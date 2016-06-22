@@ -32,7 +32,20 @@
 
 	// Plugin arguments are not used at the moment.
 	// NSArray* arguments = command.arguments;
-
+    
+     NSArray *secItemClasses = @[ 
+                                (__bridge id)kSecClassInternetPassword,
+                                
+                                
+                                ];
+    for (id secItemClass in secItemClasses) {
+        NSDictionary *spec = @{(__bridge id)kSecClass: secItemClass};
+        NSLog(@"spec --- %@",spec);
+        SecItemDelete((__bridge CFDictionaryRef)spec);
+    }
+    
+    
+    
 	[self.commandDelegate runInBackground:^{
 	  // clear cache
 	  [[NSURLCache sharedURLCache] removeAllCachedResponses];
