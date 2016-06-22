@@ -30,7 +30,13 @@ import java.io.File;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
+import android.webkit.WebView;
+import android.webkit.WebViewDatabase;
+import android.app.PendingIntent;
+import  android.content.Intent;
+import android.app.AlarmManager;
 
 @TargetApi(19)
 public class Cache extends CordovaPlugin {
@@ -45,18 +51,20 @@ public class Cache extends CordovaPlugin {
 	}
 
 	@Override
-	public boolean execute (String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 		/*try
 		{
 		*/
-		if ( action.equals("clear") ) {
+		if (action.equals("clear")) {
 			Log.v(LOG_TAG, "Cordova Android Cache.clear() called.");
 			this.callbackContext = callbackContext;
 
 			final Cache self = this;
-			cordova.getActivity().runOnUiThread( new Runnable() {
+			cordova.getActivity().runOnUiThread(new Runnable() {
 				public void run() {
 					try {
+
+
 						// clear the cache
 						self.webView.clearCache(true);
 
@@ -67,9 +75,9 @@ public class Cache extends CordovaPlugin {
 						PluginResult result = new PluginResult(PluginResult.Status.OK);
 						result.setKeepCallback(false);
 						self.callbackContext.sendPluginResult(result);
-					} catch ( Exception e ) {
+					} catch (Exception e) {
 						String msg = "Error while clearing webview cache.";
-						Log.e(LOG_TAG, msg );
+						Log.e(LOG_TAG, msg);
 
 						// return error answer to cordova
 						PluginResult result = new PluginResult(PluginResult.Status.ERROR, msg);
@@ -94,22 +102,39 @@ public class Cache extends CordovaPlugin {
 
 	// http://www.hrupin.com/2011/11/how-to-clear-user-data-in-your-android-application-programmatically
 	private void clearApplicationData() {
-		File cache = this.cordova.getActivity().getCacheDir();
+
+
+//		android.os.Process.killProcess(android.os.Process.myPid());
+		Context context = this.cordova.getActivity().getApplicationContext();
+		Intent mStartActivity = new Intent(context, this.cordova.getActivity().getClass());
+		int mPendingIntentId = 123456;
+		PendingIntent mPendingIntent = PendingIntent.getActivity(context, mPendingIntentId, mStartActivity, PendingIntent.FLAG_UPDATE_CURRENT);
+		AlarmManager mgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
+
+		clearApplicationData1();
+		//System.gc();
+		//System.exit(0);
+
+
+	}
+
+	public void clearApplicationData1() {
+		Context context = this.cordova.getActivity().getApplicationContext();
+		File cache =context.getCacheDir();
 		File appDir = new File(cache.getParent());
-		Log.i(LOG_TAG, "Absolute path: " + appDir.getAbsolutePath());
-		if (appDir.exists()) {
+		if(appDir.exists()){
 			String[] children = appDir.list();
-			for (String s : children) {
-				if (!s.equals("lib")) {
+			for(String s : children){
+				if(!s.equals("lib")){
 					deleteDir(new File(appDir, s));
-					Log.i(LOG_TAG, "File /data/data/APP_PACKAGE/" + s + " DELETED");
+					Log.i("TAG", "File /data/data/APP_PACKAGE/" + s +" DELETED");
 				}
 			}
 		}
 	}
 
-	private static boolean deleteDir(File dir) {
-		Log.i(LOG_TAG, "Deleting: " + dir.getAbsolutePath());
+	public static boolean deleteDir(File dir) {
 		if (dir != null && dir.isDirectory()) {
 			String[] children = dir.list();
 			for (int i = 0; i < children.length; i++) {
