@@ -26,6 +26,25 @@ deleteDatabase("webviewCache.db");
 But we didn't get time to do so, workaround implemented was to restart the android app.
 
 
+#### Usage
+
+```javascript
+document.addEventListener('deviceready', onDeviceReady);
+
+function onDeviceReady() {
+  var success = function(status) {
+    alert('Message: ' + status);
+  }
+
+  var error = function(status) {
+    alert('Error: ' + status);
+  }
+
+  window.cache.clear(success, error);
+  window.cache.cleartemp();
+}
+
+```
 
 
 
